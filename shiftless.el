@@ -56,20 +56,14 @@
 
 ;;; Code:
 
-(defconst shiftless-dvp-layout
-  '((?@ . "^")
-    (?/ . "?")
-    (92 . "|")
-    (?# . "`")
-    (?, . "<")
-    (?. . ">")
-    (59 . ":")
-    (?~ . "~")
-    (?& . "%")
-    (?- . "_")
-    (?$ . "~")))
 
-(defconst shiftless-qwerty-layout
+(defcustom shiftless-delay 0.200
+  "The delay before key repeat start when holding a key.")
+
+(defcustom shiftless-interval 0.05
+  "The interval between each repeat input when holding a key.")
+
+(defcustom shiftless-upper-rules
   '((?` . "~")
     (?/ . "?")
     (92 . "|")
@@ -88,16 +82,8 @@
     (?, . "<")
     (?. . ">")
     (59 . ":")
-    (?' . "\"")))
-
-(defcustom shiftless-delay 0.200
-  "The delay before key repeat start when holding a key.")
-
-(defcustom shiftless-interval 0.05
-  "The interval between each repeat input when holding a key.")
-
-(defcustom shiftless-keyborad-layout shiftless-qwerty-layout
-  "Which keyboard is used.")
+    (?' . "\""))
+  "The uppercase mapping for non-alphabet characters.")
 
 (defvar shiftless--last-insert-char nil)
 
@@ -113,7 +99,7 @@
   (let ((ch (char-before)))
     (when ch
       (let ((pair (find-if (lambda (x) (equal (car x) ch))
-                           shiftless-keyborad-layout)))
+                           shiftless-upper-rules)))
         (if pair
             (let ((x (cdr pair)))
               (delete-char -1)
@@ -166,6 +152,42 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
 
   (setq shiftless--last-insert-char last-input-event
         shiftless--last-insert-time (current-time)))
+
+(defun shiftless-use-layout-dvp ()
+  (setq shiftless-upper-rules
+        '((?@ . "^")
+          (?/ . "?")
+          (92 . "|")
+          (?# . "`")
+          (?, . "<")
+          (?. . ">")
+          (59 . ":")
+          (?~ . "~")
+          (?& . "%")
+          (?- . "_")
+          (?$ . "~"))))
+
+(defun shiftless-use-layout-qwerty ()
+  (setq shiftless-upper-rules
+        '((?` . "~")
+          (?/ . "?")
+          (92 . "|")
+          (49 . "!")
+          (50 . "@")
+          (51 . "#")
+          (52 . "$")
+          (53 . "%")
+          (54 . "^")
+          (55 . "&")
+          (57 . "*")
+          (58 . "(")
+          (59 . ")")
+          (?- . "_")
+          (?= . "+")
+          (?, . "<")
+          (?. . ">")
+          (59 . ":")
+          (?' . "\""))))
 
 (defun shiftless--enable ()
   (add-hook 'post-self-insert-hook 'shiftless--after-self-insert))
