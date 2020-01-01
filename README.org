@@ -1,0 +1,41 @@
+#+title: shiftless.el
+#+author: Shi Tianshu
+
+* Installation
+
+** Quelpa
+   TBD
+
+** Melpa
+   TBD
+
+* Usage
+
+Detecting your key holding, automatically convert a series of lowercase characters to a single uppercase.
+
+When you holding a key, there's a ~delay~ before the repeating start, and a ~interval~ between each repeat.
+
+For example, I use
+
+#+BEGIN_SRC shell
+xset r rate 180 45
+#+END_SRC
+
+So in my case, key repeat ~delay~ is 180ms, and key repeat ~interval~ is 45ms.
+
+Now I can enable the shiftless with:
+#+BEGIN_SRC emacs-lisp
+(setq shiftless-delay 180)
+(setq shiftless-interval 45)
+(shiftless-mode 1)
+#+END_SRC
+
+* Limitations
+
+Not work with kmacro, since we know nothing with time in kmacro.
+
+You need a high keyboard repeat rate, at least higher than your finger can do.
+
+* Licence
+
+Licenced under GPLV3.
