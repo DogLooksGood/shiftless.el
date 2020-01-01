@@ -195,6 +195,7 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
 (defun shiftless--disable ()
   (remove-hook 'post-self-insert-hook 'shiftless--after-self-insert))
 
+;;;###autoload
 (define-minor-mode shiftless-mode
   "A minor help you insert uppercase by holding the key."
   nil
