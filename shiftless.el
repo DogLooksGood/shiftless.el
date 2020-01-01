@@ -46,8 +46,8 @@
 
 ;; Now I can enable the shiftless with:
 ;; #+BEGIN_SRC emacs-lisp
-;; (setq shiftless-delay 180)
-;; (setq shiftless-interval 45)
+;; (setq shiftless-delay 0.2) ;; larger than 0.18
+;; (setq shiftless-interval 0.05) ;; larger than 0.045
 ;; (shiftless-mode 1)
 ;; #+END_SRC
 
