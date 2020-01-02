@@ -5,7 +5,7 @@
 ;; Author: Shi Tianshu
 ;; Homepage: https://github.com/DogLooksGood/shiftless.el
 ;; Version: 0.0.1
-;; Package-Requires: ()
+;; Package-Requires: ((seq "2.16"))
 ;; Keywords: Shift, Uppercase
 
 ;; This file is not part of GNU Emacs.
@@ -57,14 +57,20 @@
 ;;; Code:
 
 (defcustom shiftless-delay 0.200
-  "The delay before key repeat start when holding a key.")
+  "The delay before key repeat start when holding a key."
+  :type '(number :tag "Seconds")
+  :group 'shiftless)
 
 (defcustom shiftless-interval 0.05
-  "The interval between each repeat input when holding a key.")
+  "The interval between each repeat input when holding a key."
+  :type '(number :tag "Seconds")
+  :group 'shiftless)
 
 (defcustom shiftless-upper-rules
   nil
-  "The uppercase mapping for non-alphabet characters.")
+  "The uppercase mapping for non-alphabet characters."
+  :type '(list :tag "Rules")
+  :group 'shiftless)
 
 (defvar shiftless--last-insert-char nil)
 
@@ -76,16 +82,24 @@
 
 (defvar shiftless--cursor-count 1)
 
-(defun shiftless--should-process ()
+(defvar shiftless--after-upcase nil)
+
+(defun shiftless--cancel-input ()
+  "Cancel this input.
+For most case, just delete the previous char is enough.
+Some mode need more work to be compatible."
+  (delete-char -1))
+
+(defun shiftless--should-process-p ()
   (and (numberp last-input-event)
        (or
-        (find-if (lambda (x) (equal (car x) last-input-event)) shiftless-upper-rules)
+        (seq-find (lambda (x) (equal (car x) last-input-event)) shiftless-upper-rules)
         (<= ?a last-input-event ?z))))
 
 (defun shiftless--upcase-previous-char ()
   (let ((ch (char-before)))
-    (let ((pair (find-if (lambda (x) (equal (car x) ch))
-                         shiftless-upper-rules)))
+    (let ((pair (seq-find (lambda (x) (equal (car x) ch))
+                          shiftless-upper-rules)))
       (if pair
           (let ((x (cdr pair)))
             (delete-char -1)
@@ -116,7 +130,7 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
   (let ((cursor-count (shiftless--get-cursor-count)))
     (if (and shiftless--last-insert-char
              shiftless--last-insert-time
-             (shiftless--should-process)
+             (shiftless--should-process-p)
              (equal shiftless--last-insert-char last-input-event)
              (shiftless--holding-in-time-p))
         (let* ((cnt-max (* cursor-count shiftless--trigger-count))
@@ -124,18 +138,17 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
           (setq shiftless--count-repeat-key (1+ shiftless--count-repeat-key))
           (cond
            ((> shiftless--count-repeat-key cnt-max)
-            (delete-char -1))
-
+            (shiftless--cancel-input)
+            (setq shiftless--after-upcase t))
            ((and
              (> shiftless--count-repeat-key cnt-min)
              (<= shiftless--count-repeat-key cnt-max))
             (backward-delete-char (1- shiftless--trigger-count))
             (shiftless--upcase-previous-char))))
-
       (progn
         (setq shiftless--count-repeat-key 1
-              shiftless--cursor-count 1))))
-
+              shiftless--cursor-count 1
+              shiftless--after-upcase nil))))
   (setq shiftless--last-insert-char last-input-event
         shiftless--last-insert-time (current-time)))
 
@@ -175,8 +188,12 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
           (59 . ":")
           (?' . "\""))))
 
+(defun shiftless--prevent-advice (func &rest args)
+  (unless shiftless--after-upcase
+    (apply func args)))
+
 (defun shiftless--enable ()
-  (add-hook 'post-self-insert-hook 'shiftless--after-self-insert t))
+  (add-hook 'post-self-insert-hook 'shiftless--after-self-insert))
 
 (defun shiftless--disable ()
   (remove-hook 'post-self-insert-hook 'shiftless--after-self-insert))
