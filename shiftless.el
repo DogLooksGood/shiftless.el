@@ -76,17 +76,23 @@
 
 (defvar shiftless--cursor-count 1)
 
+(defun shiftless--should-process ()
+  (and (numberp last-input-event)
+       (or
+        (find-if (lambda (x) (equal (car x) last-input-event)) shiftless-upper-rules)
+        (<= ?a last-input-event ?z))))
+
 (defun shiftless--upcase-previous-char ()
   (let ((ch (char-before)))
-    (when ch
-      (let ((pair (find-if (lambda (x) (equal (car x) ch))
-                           shiftless-upper-rules)))
-        (if pair
-            (let ((x (cdr pair)))
-              (delete-char -1)
-              (if (stringp x)
-                  (insert x)
-                (call-interactively x)))
+    (let ((pair (find-if (lambda (x) (equal (car x) ch))
+                         shiftless-upper-rules)))
+      (if pair
+          (let ((x (cdr pair)))
+            (delete-char -1)
+            (if (stringp x)
+                (insert x)
+              (call-interactively x)))
+        (when (<= ?a ch ?z)
           (upcase-char -1))))))
 
 (defun shiftless--get-cursor-count ()
@@ -110,8 +116,7 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
   (let ((cursor-count (shiftless--get-cursor-count)))
     (if (and shiftless--last-insert-char
              shiftless--last-insert-time
-             (not (or (equal shiftless--last-insert-char 'return)
-                      (equal shiftless--last-insert-char 32)))
+             (shiftless--should-process)
              (equal shiftless--last-insert-char last-input-event)
              (shiftless--holding-in-time-p))
         (let* ((cnt-max (* cursor-count shiftless--trigger-count))
@@ -171,7 +176,7 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
           (?' . "\""))))
 
 (defun shiftless--enable ()
-  (add-hook 'post-self-insert-hook 'shiftless--after-self-insert))
+  (add-hook 'post-self-insert-hook 'shiftless--after-self-insert t))
 
 (defun shiftless--disable ()
   (remove-hook 'post-self-insert-hook 'shiftless--after-self-insert))
