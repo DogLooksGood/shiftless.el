@@ -42,20 +42,19 @@
 ;;
 ;; You need a high keyboard repeat rate, at least higher than your finger can do.
 ;;
-;; So in my case, key repeat ~delay~ is 180ms, and key repeat ~interval~ is 45ms.
-
+;; So in my case, key repeat ~delay~ is 180ms, and key repeat ~interval~ is 1s / 45 = 22ms.
+;;
 ;; Now I can enable the shiftless with:
 ;; #+BEGIN_SRC emacs-lisp
 ;; (setq shiftless-delay 0.2) ;; larger than 0.18
-;; (setq shiftless-interval 0.05) ;; larger than 0.045
+;; (setq shiftless-interval 0.04) ;; larger than 0.022
 ;; (shiftless-mode 1)
 ;; #+END_SRC
-
+;;
 ;; * License
 ;; Licensed under the GPLv3.
 
 ;;; Code:
-
 
 (defcustom shiftless-delay 0.200
   "The delay before key repeat start when holding a key.")
@@ -64,25 +63,7 @@
   "The interval between each repeat input when holding a key.")
 
 (defcustom shiftless-upper-rules
-  '((?` . "~")
-    (?/ . "?")
-    (92 . "|")
-    (49 . "!")
-    (50 . "@")
-    (51 . "#")
-    (52 . "$")
-    (53 . "%")
-    (54 . "^")
-    (55 . "&")
-    (57 . "*")
-    (58 . "(")
-    (59 . ")")
-    (?- . "_")
-    (?= . "+")
-    (?, . "<")
-    (?. . ">")
-    (59 . ":")
-    (?' . "\""))
+  nil
   "The uppercase mapping for non-alphabet characters.")
 
 (defvar shiftless--last-insert-char nil)
@@ -172,16 +153,16 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
         '((?` . "~")
           (?/ . "?")
           (92 . "|")
-          (49 . "!")
-          (50 . "@")
-          (51 . "#")
-          (52 . "$")
-          (53 . "%")
-          (54 . "^")
-          (55 . "&")
-          (57 . "*")
-          (58 . "(")
-          (59 . ")")
+          (?1 . "!")
+          (?2 . "@")
+          (?3 . "#")
+          (?4 . "$")
+          (?5 . "%")
+          (?6 . "^")
+          (?7 . "&")
+          (?8 . "*")
+          (?9 . "(")
+          (?0 . ")")
           (?- . "_")
           (?= . "+")
           (?, . "<")
@@ -194,6 +175,8 @@ To be compatible with multiple cursors, we have to save the result of mc/num-cur
 
 (defun shiftless--disable ()
   (remove-hook 'post-self-insert-hook 'shiftless--after-self-insert))
+
+(shiftless-use-layout-qwerty)
 
 ;;;###autoload
 (define-minor-mode shiftless-mode

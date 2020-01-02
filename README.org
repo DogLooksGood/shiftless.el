@@ -21,12 +21,12 @@ For example, I use
 xset r rate 180 45
 #+END_SRC
 
-So in my case, key repeat ~delay~ is 180ms, and key repeat ~interval~ is 45ms.
+So in my case, key repeat ~delay~ is 180ms, and key repeat ~interval~ is 1s / 45 = 22ms.
 
 Now I can enable the shiftless with:
 #+BEGIN_SRC emacs-lisp
 (setq shiftless-delay 0.2) ;; larger than 0.18
-(setq shiftless-interval 0.05) ;; larger than 0.045
+(setq shiftless-interval 0.04) ;; larger than 0.022
 (shiftless-mode 1)
 #+END_SRC
 
